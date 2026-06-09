@@ -438,22 +438,22 @@ const claimBattlePassReward = (level, type) => {
     setTotalPrice(prev => prev + reward.amount); 
     setMessage(`✅ +${reward.amount} 🪙`); 
   }
-  else if (reward.type === 'rod') { 
-    setRods(prev => [...prev, { id: reward.item.id, name: reward.item.name, durability: 100 }]); 
-    setMessage(`✅ Удочка ${reward.item.name}!`); 
-  }
-  else if (reward.type === 'reel') { 
-    setReels(prev => [...prev, { id: reward.item.id, name: reward.item.name, durability: 100 }]); 
-    setMessage(`✅ Катушка ${reward.item.name}!`); 
-  }
-  else if (reward.type === 'line') { 
-    setLines(prev => [...prev, { id: reward.item.id, name: reward.item.name, durability: 100 }]); 
-    setMessage(`✅ Леска ${reward.item.name}!`); 
-  }
-  else if (reward.type === 'hook') { 
-    setHooks(prev => [...prev, { id: reward.item.id, name: reward.item.name, durability: 100 }]); 
-    setMessage(`✅ Крючок ${reward.item.name}!`); 
-  }
+else if (reward.type === 'rod') { 
+  setRods(prev => [...prev, { id: reward.item.id, name: reward.item.name, durability: 100 }]); 
+  setMessage(`✅ Удочка ${reward.item.name}!`); 
+}
+else if (reward.type === 'reel') { 
+  setReels(prev => [...prev, { id: reward.item.id, name: reward.item.name, durability: 100 }]); 
+  setMessage(`✅ Катушка ${reward.item.name}!`); 
+}
+else if (reward.type === 'line') { 
+  setLines(prev => [...prev, { id: reward.item.id, name: reward.item.name, durability: 100 }]); 
+  setMessage(`✅ Леска ${reward.item.name}!`); 
+}
+else if (reward.type === 'hook') { 
+  setHooks(prev => [...prev, { id: reward.item.id, name: reward.item.name, durability: 100 }]); 
+  setMessage(`✅ Крючок ${reward.item.name}!`); 
+}
   else if (reward.type === 'bait') { 
     for (let i=0;i<(reward.amount||1);i++) setBaits(prev=>[...prev,{id:reward.item.id,name:reward.item.name}]); 
     setMessage(`✅ ${reward.item.name} x${reward.amount||1}!`); 
@@ -466,18 +466,19 @@ const claimBattlePassReward = (level, type) => {
     setDoubleCoinsUntil(Date.now()+reward.duration*60000); 
     setMessage(`✅ x2 монет на ${reward.duration}м!`); 
   }
-  else if (reward.type === 'durability_shield') { 
-    setDurabilityShieldUntil(Date.now()+reward.duration*60000); 
-    setMessage(`✅ Страховка на ${reward.duration}м!`); 
-  }
-  
-  // Отмечаем награду как полученную
-  if (type === 'free') {
-    setBattlePassClaimed(prev => ({...prev, free: [...prev.free, level]}));
-  } else {
-    setBattlePassClaimed(prev => ({...prev, premium: [...prev.premium, level]}));
-  }
-};
+    else if (reward.type === 'durability_shield') { 
+      setDurabilityShieldUntil(Date.now()+reward.duration*60000); 
+      setMessage(`✅ Страховка на ${reward.duration}м!`); 
+    }
+    
+    // Принудительное сохранение после выдачи награды
+    saveToVK();
+    
+    if (type === 'free') {
+      setBattlePassClaimed(prev => ({...prev, free: [...prev.free, level]}));
+    } else {
+      setBattlePassClaimed(prev => ({...prev, premium: [...prev.premium, level]}));
+    }
 
   useEffect(() => {
     const handleOnline = () => setMessage('✅ Интернет восстановлен!');
