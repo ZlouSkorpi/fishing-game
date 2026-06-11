@@ -1178,6 +1178,7 @@ if (loading) {
               <Button stretched mode="secondary" onClick={() => setCurrentScreen('collection')} style={{ background: darkTheme ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.5)', color: 'white' }}>📔 КОЛЛЕКЦИЯ ({collectedCount}/{totalFish})</Button>
               <Button stretched mode="secondary" onClick={() => setCurrentScreen('profile')} style={{ background: darkTheme ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.5)', color: 'white' }}>👤 ПРОФИЛЬ</Button>
             </div>
+            <Button stretched mode="secondary" onClick={() => setCurrentScreen('news')} style={{ background: '#2196F3', color: 'white' }}>📰 НОВОСТИ</Button>
             <Button stretched mode="secondary" onClick={() => setAlertBox({ show: true, title: '📧 Поддержка', message: 'По вопросам и предложениям:\nfishing.vk.game@gmail.com' })} style={{ marginTop: '12px', background: darkTheme ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.5)', color: 'white' }}>
              📧 ПОДДЕРЖКА
             </Button>
@@ -1690,24 +1691,22 @@ if (currentScreen === 'news') {
         <PanelHeader style={{ background: darkTheme ? 'rgba(0,0,0,0.8)' : 'rgba(0,0,0,0.3)', color: 'white' }} before={<span style={{ cursor: 'pointer' }} onClick={() => setCurrentScreen('menu')}>←</span>}>📰 НОВОСТИ</PanelHeader>
         <Group><Div>
           <div style={{ background: darkTheme ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.95)', borderRadius: '24px', padding: '20px', color: darkTheme ? 'white' : 'black' }}>
-            <Title level="2" style={{ textAlign: 'center', marginBottom: '20px' }}>📋 Последние обновления</Title>
+            <Title level="2" style={{ textAlign: 'center', marginBottom: '20px' }}>📋 Патчи и обновления</Title>
             
             <div style={{ background: darkTheme ? 'rgba(255,255,255,0.08)' : '#f5f5f5', borderRadius: '16px', padding: '16px', marginBottom: '12px' }}>
-              <div style={{ fontWeight: 'bold', fontSize: '16px', marginBottom: '8px' }}>🎣 Обновление 1.2</div>
-              <Text style={{ fontSize: '14px' }}>Добавлен прогноз клёва! Теперь на главном экране видно активность рыбы.</Text>
+              <div style={{ fontWeight: 'bold', fontSize: '16px', marginBottom: '8px' }}>🔧 Патч 0.1</div>
+              <Text style={{ fontSize: '14px' }}>
+                • Прогноз клёва на главном экране<br/>
+                • Индикатор износа снастей (зелёный/жёлтый/красный)<br/>
+                • Ремонт снастей в Складе<br/>
+                • Статистика по водоёмам<br/>
+                • Подтверждение продажи садка<br/>
+                • Модальные окна вместо браузерных alert<br/>
+                • Баланс: лодка 20 000 🪙, лески дешевле, садок до 40 ячеек<br/>
+                • Случайный бонус при ловле (8% шанс)<br/>
+                • ⚠️ Прогресс пока сохраняется локально в одном браузере. Команда работает над облачным сохранением между устройствами.
+              </Text>
               <div style={{ fontSize: '11px', color: '#888', marginTop: '8px' }}>10 июня 2026</div>
-            </div>
-            
-            <div style={{ background: darkTheme ? 'rgba(255,255,255,0.08)' : '#f5f5f5', borderRadius: '16px', padding: '16px', marginBottom: '12px' }}>
-              <div style={{ fontWeight: 'bold', fontSize: '16px', marginBottom: '8px' }}>🐛 Новые наживки</div>
-              <Text style={{ fontSize: '14px' }}>В магазине появился Кальмар — привлекает морских хищников!</Text>
-              <div style={{ fontSize: '11px', color: '#888', marginTop: '8px' }}>8 июня 2026</div>
-            </div>
-            
-            <div style={{ background: darkTheme ? 'rgba(255,255,255,0.08)' : '#f5f5f5', borderRadius: '16px', padding: '16px', marginBottom: '12px' }}>
-              <div style={{ fontWeight: 'bold', fontSize: '16px', marginBottom: '8px' }}>🚤 Глубокое море</div>
-              <Text style={{ fontSize: '14px' }}>Открыт новый водоём! Покупай лодку и лови Кита, Марлина и Акулу!</Text>
-              <div style={{ fontSize: '11px', color: '#888', marginTop: '8px' }}>5 июня 2026</div>
             </div>
           </div>
           <Spacing size={20} />
