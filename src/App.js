@@ -1511,7 +1511,7 @@ if (loading) {
           </div>
           <div style={{ background: darkTheme ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.95)', borderRadius: '16px', padding: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', color: darkTheme ? 'white' : 'black' }}>
             <div><div style={{ fontWeight: 'bold' }}>Лодка</div><div style={{ fontSize: '11px' }}>Открывает глубокое море</div></div>
-            <Button size="s" onClick={buyBoat} disabled={hasBoat || totalPrice < 2000}>{hasBoat ? 'Есть' : '2000 🪙'}</Button>
+            <Button size="s" onClick={buyBoat} disabled={hasBoat || totalPrice < 2000}>{hasBoat ? 'Есть' : '20000 🪙'}</Button>
           </div>
           <Spacing size={20} />
           <Button stretched mode="secondary" onClick={() => setCurrentScreen('menu')}>← Назад в меню</Button>
