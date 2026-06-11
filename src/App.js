@@ -1046,7 +1046,7 @@ const repairItem = (type, itemId, index) => {
     if (timer) clearTimeout(timer); if (autoMissTimer) clearTimeout(autoMissTimer); setShowFishShadow(false);
   };
 
-  if (loading) {
+if (loading) {
     return (
       <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', background: darkTheme ? '#0a0a0a' : 'linear-gradient(135deg, #0a4a6e, #1a6d8f)', color: 'white' }}>
         <div style={{ fontSize: '64px', marginBottom: '20px', animation: 'float 2s ease-in-out infinite' }}>🎣</div>
@@ -1178,12 +1178,20 @@ const repairItem = (type, itemId, index) => {
               <Button stretched mode="secondary" onClick={() => setCurrentScreen('collection')} style={{ background: darkTheme ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.5)', color: 'white' }}>📔 КОЛЛЕКЦИЯ ({collectedCount}/{totalFish})</Button>
               <Button stretched mode="secondary" onClick={() => setCurrentScreen('profile')} style={{ background: darkTheme ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.5)', color: 'white' }}>👤 ПРОФИЛЬ</Button>
             </div>
-            <Button stretched mode="secondary" onClick={() => setCurrentScreen('news')} style={{ background: '#2196F3', color: 'white' }}>📰 НОВОСТИ</Button>
             <Button stretched mode="secondary" onClick={() => setAlertBox({ show: true, title: '📧 Поддержка', message: 'По вопросам и предложениям:\nfishing.vk.game@gmail.com' })} style={{ marginTop: '12px', background: darkTheme ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.5)', color: 'white' }}>
-              📧 ПОДДЕРЖКА
+             📧 ПОДДЕРЖКА
             </Button>
           </Div>
         </Group>
+        {alertBox.show && (
+          <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.7)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 9999 }}>
+            <div style={{ background: darkTheme ? '#333' : '#fff', borderRadius: '16px', padding: '20px', width: '300px', textAlign: 'center' }}>
+              <div style={{ fontSize: '18px', marginBottom: '16px', color: darkTheme ? 'white' : 'black' }}>{alertBox.title}</div>
+              <div style={{ marginBottom: '20px', color: darkTheme ? 'white' : 'black', whiteSpace: 'pre-line' }}>{alertBox.message}</div>
+              <Button stretched onClick={() => setAlertBox({ show: false, title: '', message: '' })} style={{ background: '#2196F3' }}>ОК</Button>
+            </div>
+          </div>
+        )}
       </div>
     );
   }
@@ -1741,6 +1749,7 @@ if (currentScreen === 'news') {
   };
 
 return (
+    <>
     <div style={{ 
       minHeight: '100vh', 
       backgroundImage: `linear-gradient(rgba(0,0,0,${isNightTime() ? '0.7' : '0.4'}), rgba(0,0,0,${isNightTime() ? '0.8' : '0.6'})), url(${currentLakeData?.bgImage})`,
@@ -1842,6 +1851,17 @@ return (
         .reel-animation { animation: reelAnimation 0.5s ease-in-out infinite; display: inline-block; }
       `}</style>
     </div>
+    
+    {alertBox.show && (
+      <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.7)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 9999 }}>
+        <div style={{ background: darkTheme ? '#333' : '#fff', borderRadius: '16px', padding: '20px', width: '300px', textAlign: 'center' }}>
+          <div style={{ fontSize: '18px', marginBottom: '16px', color: darkTheme ? 'white' : 'black' }}>{alertBox.title}</div>
+          <div style={{ marginBottom: '20px', color: darkTheme ? 'white' : 'black', whiteSpace: 'pre-line' }}>{alertBox.message}</div>
+          <Button stretched onClick={() => setAlertBox({ show: false, title: '', message: '' })} style={{ background: '#2196F3' }}>ОК</Button>
+        </div>
+      </div>
+    )}
+    </>
   );
 }
 
