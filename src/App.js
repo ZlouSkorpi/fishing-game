@@ -47,15 +47,15 @@ const RODS = [
 
 const LINES = [
   { id: 'line1', name: 'Нить капроновая 0.12', price: 0, strength: 35, durabilityMax: 100 },
-  { id: 'line2', name: 'Леска Крепыш 0.15', price: 100, strength: 45, durabilityMax: 100 },
-  { id: 'line3', name: 'Плетёнка Волна 0.18', price: 250, strength: 55, durabilityMax: 100 },
-  { id: 'line4', name: 'Шнур Титан 0.20', price: 450, strength: 65, durabilityMax: 100 },
-  { id: 'line5', name: 'Флюр Невидимка 0.22', price: 700, strength: 75, durabilityMax: 100 },
-  { id: 'line6', name: 'Плетёнка Удав 0.25', price: 1000, strength: 85, durabilityMax: 100 },
-  { id: 'line7', name: 'Трос Броня 0.28', price: 1500, strength: 95, durabilityMax: 100 },
-  { id: 'line8', name: 'Шнур Стальной 0.30', price: 2200, strength: 105, durabilityMax: 100 },
-  { id: 'line9', name: 'Леска Дракон 0.35', price: 3500, strength: 120, durabilityMax: 100 },
-  { id: 'line10', name: 'Плетёнка Кит 0.40', price: 5000, strength: 140, durabilityMax: 100 }
+  { id: 'line2', name: 'Леска Крепыш 0.15', price: 60, strength: 45, durabilityMax: 100 },
+  { id: 'line3', name: 'Плетёнка Волна 0.18', price: 140, strength: 55, durabilityMax: 100 },
+  { id: 'line4', name: 'Шнур Титан 0.20', price: 240, strength: 65, durabilityMax: 100 },
+  { id: 'line5', name: 'Флюр Невидимка 0.22', price: 360, strength: 75, durabilityMax: 100 },
+  { id: 'line6', name: 'Плетёнка Удав 0.25', price: 500, strength: 85, durabilityMax: 100 },
+  { id: 'line7', name: 'Трос Броня 0.28', price: 700, strength: 95, durabilityMax: 100 },
+  { id: 'line8', name: 'Шнур Стальной 0.30', price: 1000, strength: 105, durabilityMax: 100 },
+  { id: 'line9', name: 'Леска Дракон 0.35', price: 1500, strength: 120, durabilityMax: 100 },
+  { id: 'line10', name: 'Плетёнка Кит 0.40', price: 2200, strength: 140, durabilityMax: 100 }
 ];
 
 const REELS = [
@@ -244,6 +244,7 @@ function App() {
   const [biteTimeReduction, setBiteTimeReduction] = useState(0);
   const [timeOfDay, setTimeOfDay] = useState('day');
   const [nightCatches, setNightCatches] = useState(0);
+  const [lakeStats, setLakeStats] = useState({});
   const [showFishShadow, setShowFishShadow] = useState(false);
   const [battlePassXp, setBattlePassXp] = useState(0);
   const [battlePassLevel, setBattlePassLevel] = useState(0);
@@ -258,6 +259,8 @@ function App() {
   const [promoInput, setPromoInput] = useState('');
   const [promoUsed, setPromoUsed] = useState({});
   const [confirmSell, setConfirmSell] = useState({ show: false, type: null, itemId: null, itemName: null, index: null, price: null });
+  const [confirmClearTank, setConfirmClearTank] = useState(false);
+  const [alertBox, setAlertBox] = useState({ show: false, title: '', message: '' });
   const [purchaseAnimation, setPurchaseAnimation] = useState(false);
 
   const loadFromVK = async () => {
@@ -279,13 +282,13 @@ function App() {
 
   const saveToVK = async () => {
     const data = {
-      totalWeight, totalPrice, totalCatches, maxWeightEver, bestCatch, rods, lines, reels, hooks, riggings, baits, feeds,
-      activeRod, activeLine, activeReel, activeHook, activeRigging, activeBait, activeFeed, fishTank, tankCapacity,
-      achievements, lastDailyBonus, dailyStreak, level, xp, hasBoat, maxCastBonus, fishCollection, darkTheme,
-      dailyQuests, completedQuests, lastQuestReset, tipIndex, riggingCatches, biteTimeReduction, lastAuctionTime,
-      nightCatches, storyStep, storyCompleted,
-      battlePassXp, battlePassLevel, battlePassPremium, battlePassClaimed, doubleCoinsUntil, durabilityShieldUntil
-    };
+    totalWeight, totalPrice, totalCatches, maxWeightEver, bestCatch, rods, lines, reels, hooks, riggings, baits, feeds,
+    activeRod, activeLine, activeReel, activeHook, activeRigging, activeBait, activeFeed, fishTank, tankCapacity,
+    achievements, lastDailyBonus, dailyStreak, level, xp, hasBoat, maxCastBonus, fishCollection, darkTheme,
+    dailyQuests, completedQuests, lastQuestReset, tipIndex, riggingCatches, biteTimeReduction, lastAuctionTime,
+    nightCatches, storyStep, storyCompleted, lakeStats,
+    battlePassXp, battlePassLevel, battlePassPremium, battlePassClaimed, doubleCoinsUntil, durabilityShieldUntil
+};
     localStorage.setItem('fishingGame', JSON.stringify(data));
     try { await bridge.send('VKWebAppStorageSet', { key: 'fishingGame', value: JSON.stringify(data) }); } catch (e) {}
   };
@@ -426,6 +429,15 @@ function App() {
   const isNightTime = () => timeOfDay === 'night';
   const getTimeEmoji = () => isNightTime() ? '🌙' : '☀️';
   const getTimeName = () => isNightTime() ? 'Ночь' : 'День';
+  const getBiteActivity = () => {
+    const weatherBonus = WEATHERS[weather]?.biteBonus || 0;
+    const timeBonus = isNightTime() ? -5 : 5;
+    const randomFactor = Math.floor(Math.random() * 20) - 10;
+    const total = weatherBonus + timeBonus + randomFactor;
+    if (total >= 15) return { level: 'Высокая', emoji: '🔥', color: '#4caf50' };
+    if (total >= 0) return { level: 'Средняя', emoji: '👍', color: '#ffc107' };
+    return { level: 'Низкая', emoji: '💤', color: '#ff4444' };
+};
 
   useEffect(() => {
     const loadData = async () => {
@@ -481,6 +493,7 @@ function App() {
         setBattlePassClaimed(data.battlePassClaimed || { free: [], premium: [] });
         setDoubleCoinsUntil(data.doubleCoinsUntil || null);
         setDurabilityShieldUntil(data.durabilityShieldUntil || null);
+        setLakeStats(data.lakeStats || {});
       }
       const hour = new Date().getHours();
       setTimeOfDay(hour >= 6 && hour < 22 ? 'day' : 'night');
@@ -526,7 +539,7 @@ function App() {
       achievements, lastDailyBonus, dailyStreak, level, xp, hasBoat, maxCastBonus, fishCollection, darkTheme,
       dailyQuests, completedQuests, lastQuestReset, tipIndex, riggingCatches, biteTimeReduction, lastAuctionTime,
       nightCatches, storyStep, storyCompleted,
-      battlePassXp, battlePassLevel, battlePassPremium, battlePassClaimed, doubleCoinsUntil, durabilityShieldUntil
+      battlePassXp, battlePassLevel, battlePassPremium, battlePassClaimed, doubleCoinsUntil, durabilityShieldUntil, lakeStats
     };
     localStorage.setItem('fishingGame', JSON.stringify(data));
     saveToVK();
@@ -661,9 +674,9 @@ function App() {
       if (type === 'rigging') setRiggings(prev => [...prev, item.id]);
       if (type === 'bait') setBaits(prev => [...prev, { id: item.id, name: item.name }]);
       if (type === 'feed') setFeeds(prev => [...prev, { id: item.id, name: item.name }]);
-      alert(`✅ Куплено: ${item.name}!`);
+      setAlertBox({ show: true, title: '🛒 Магазин', message: `✅ Куплено: ${item.name}!` });
     } else {
-      alert(`❌ Не хватает ${price - totalPrice} 🪙`);
+      setAlertBox({ show: true, title: '🛒 Магазин', message: `❌ Не хватает ${price - totalPrice} 🪙` });
     }
   };
 
@@ -876,6 +889,18 @@ function App() {
     const newFish = { id: Date.now(), name: currentFish.name, weight: currentFish.weight, emoji: currentFish.emoji, price: currentFish.price, rarity: currentFish.rarity, date: new Date().toLocaleTimeString() };
     setFishTank(prev => [...prev, newFish]);
     setTotalWeight(prev => +(prev + currentFish.weight).toFixed(1));
+    setLakeStats(prev => {
+    const lakeId = currentLake;
+    const current = prev[lakeId] || { count: 0, record: 0, recordFish: '' };
+    return {
+        ...prev,
+        [lakeId]: {
+            count: current.count + 1,
+            record: currentFish.weight > current.record ? currentFish.weight : current.record,
+            recordFish: currentFish.weight > current.record ? currentFish.name : current.recordFish
+        }
+    };
+});
     setTotalPrice(prev => prev + currentFish.price);
     setTotalCatches(prev => prev + 1);
     addXp(currentFish.xp);
@@ -891,6 +916,19 @@ function App() {
     checkStoryProgress(currentFish.name);
     useFeed(); useBait(); showNextTip();
     setMessage(`В садок! +${currentFish.price} 🪙 +${currentFish.xp} XP`);
+    if (Math.random() < 0.08) {
+    const bonusType = Math.floor(Math.random() * 3);
+    if (bonusType === 0) {
+        const bonusCoins = Math.floor(currentFish.price * 0.3);
+        setTotalPrice(prev => prev + bonusCoins);
+        setMessage(prev => prev + `\n🎁 Бонус! +${bonusCoins} 🪙`);
+    } else if (bonusType === 1) {
+        setBaits(prev => [...prev, { id: 'bait1', name: 'Червь' }]);
+        setMessage(prev => prev + `\n🎁 Бонус! +1 Червь 🐛`);
+    } else {
+        setMessage(prev => prev + `\n🎁 Рыба была с икрой!`);
+    }
+}
     setGameState('idle'); setCurrentFish(null); setLineTension(0);
   };
 
@@ -909,7 +947,8 @@ function App() {
     setTotalPrice(prev => prev + total);
     setFishTank([]);
     setMessage(`Продано всё! +${total} 🪙`);
-  };
+    setConfirmClearTank(false);
+};
 
   const exchangeFish = (fishName) => {
     const sameFish = fishTank.filter(f => f.name === fishName);
@@ -922,11 +961,47 @@ function App() {
   };
 
   const upgradeTank = () => {
-    const price = tankCapacity * 50;
-    if (totalPrice >= price) { setTotalPrice(prev => prev - price); setTankCapacity(prev => prev + 5); setMessage(`Садок расширен!`); }
+    if (tankCapacity >= 40) { setMessage('Садок максимального размера (40)!'); return; }
+    const price = tankCapacity * 120;
+    if (totalPrice >= price) { setTotalPrice(prev => prev - price); setTankCapacity(prev => Math.min(40, prev + 5)); setMessage(`Садок расширен!`); }
     else setMessage(`Не хватает ${price - totalPrice} 🪙`);
+};
+const repairItem = (type, itemId, index) => {
+    const findItem = (arr) => arr.find((_, i) => i === index);
+    let item, price;
+    
+    if (type === 'rod') {
+      item = rods[index];
+      price = Math.floor(RODS.find(r => r.id === itemId)?.price * 0.3);
+    } else if (type === 'reel') {
+      item = reels[index];
+      price = Math.floor(REELS.find(r => r.id === itemId)?.price * 0.3);
+    } else if (type === 'line') {
+      item = lines[index];
+      price = Math.floor(LINES.find(l => l.id === itemId)?.price * 0.3);
+    } else if (type === 'hook') {
+      item = hooks[index];
+      price = Math.floor(HOOKS.find(h => h.id === itemId)?.price * 0.3);
+    } else {
+      return;
+    }
+    
+    if (!item || item.durability >= 95) {
+      setMessage('Предмет не нуждается в ремонте (макс 95%)');
+      return;
+    }
+    
+    if (totalPrice >= price) {
+      setTotalPrice(prev => prev - price);
+      if (type === 'rod') setRods(prev => prev.map((r, i) => i === index ? { ...r, durability: Math.min(95, r.durability + 30) } : r));
+      if (type === 'reel') setReels(prev => prev.map((r, i) => i === index ? { ...r, durability: Math.min(95, r.durability + 30) } : r));
+      if (type === 'line') setLines(prev => prev.map((l, i) => i === index ? { ...l, durability: Math.min(95, l.durability + 30) } : l));
+      if (type === 'hook') setHooks(prev => prev.map((h, i) => i === index ? { ...h, durability: Math.min(95, h.durability + 30) } : h));
+      setMessage(`🔧 Отремонтировано за ${price} 🪙`);
+    } else {
+      setMessage(`Не хватает ${price - totalPrice} 🪙`);
+    }
   };
-
   const buyBoat = () => {
     if (!hasBoat && totalPrice >= 2000) { setTotalPrice(prev => prev - 2000); setHasBoat(true); setMessage('Лодка куплена!'); }
     else if (hasBoat) setMessage('Уже есть лодка');
@@ -1022,10 +1097,18 @@ function App() {
               <div style={{ fontSize: '11px', marginTop: '8px', color: '#ccc' }}>
                 Прогноз: {weatherForecast.map((w, i) => <span key={i}>{WEATHERS[w].icon} </span>)}
               </div>
-              <div style={{ display: 'flex', gap: '10px', marginTop: '12px' }}>
-                <Button size="s" onClick={claimDailyBonus} style={{ background: '#ff8c00', flex: 1 }}>🎁 БОНУС</Button>
-                <Button size="s" onClick={resetDailyQuests} style={{ background: '#4caf50', flex: 1 }}>📋 ЗАДАНИЯ ({completedQuestsCount}/{totalQuests})</Button>
-              </div>
+              {(() => {
+  const activity = getBiteActivity();
+  return (
+    <div style={{ fontSize: '13px', marginTop: '6px', color: activity.color, fontWeight: 'bold' }}>
+      {activity.emoji} Клёв: {activity.level}
+    </div>
+  );
+})()}
+<div style={{ display: 'flex', gap: '10px', marginTop: '12px' }}>
+  <Button size="s" onClick={claimDailyBonus} style={{ background: '#ff8c00', flex: 1 }}>🎁 БОНУС</Button>
+  <Button size="s" onClick={resetDailyQuests} style={{ background: '#4caf50', flex: 1 }}>📋 ЗАДАНИЯ ({completedQuestsCount}/{totalQuests})</Button>
+</div>
             </div>
             <div style={{ background: battlePassPremium ? 'linear-gradient(135deg, #ff8c00, #ff4444)' : '#333', borderRadius: '20px', padding: '16px', marginBottom: '16px', textAlign: 'center', color: 'white' }}>
               <div style={{ fontSize: '18px', fontWeight: 'bold' }}>🔥 СЕЗОН {currentSeason + 1} ({getSeasonEmoji(currentSeason)} {getSeasonName(currentSeason)})</div>
@@ -1075,6 +1158,11 @@ function App() {
                   <div style={{ fontSize: '12px', marginTop: '8px', textShadow: '1px 1px 2px black' }}>
                     🐟 {isNightTime() && lake.nightFishList ? lake.nightFishList.join(' · ') : lake.fishList.join(' · ')}
                   </div>
+                  {lakeStats[lake.id] && (
+                    <div style={{ fontSize: '11px', marginTop: '4px', textShadow: '1px 1px 2px black', color: '#ffd700' }}>
+                      🎣 Поймано: {lakeStats[lake.id].count} | 🏆 Рекорд: {lakeStats[lake.id].recordFish} {lakeStats[lake.id].record} кг
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
@@ -1090,8 +1178,8 @@ function App() {
               <Button stretched mode="secondary" onClick={() => setCurrentScreen('collection')} style={{ background: darkTheme ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.5)', color: 'white' }}>📔 КОЛЛЕКЦИЯ ({collectedCount}/{totalFish})</Button>
               <Button stretched mode="secondary" onClick={() => setCurrentScreen('profile')} style={{ background: darkTheme ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.5)', color: 'white' }}>👤 ПРОФИЛЬ</Button>
             </div>
-            <Button stretched mode="secondary" onClick={() => setCurrentScreen('donate')} style={{ background: darkTheme ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.5)', color: 'white' }}>🚧 В РАЗРАБОТКЕ</Button>
-            <Button stretched mode="secondary" onClick={() => alert('📧 По вопросам и предложениям:\nfishing.vk.game@gmail.com')} style={{ marginTop: '12px', background: darkTheme ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.5)', color: 'white' }}>
+            <Button stretched mode="secondary" onClick={() => setCurrentScreen('news')} style={{ background: '#2196F3', color: 'white' }}>📰 НОВОСТИ</Button>
+            <Button stretched mode="secondary" onClick={() => setAlertBox({ show: true, title: '📧 Поддержка', message: 'По вопросам и предложениям:\nfishing.vk.game@gmail.com' })} style={{ marginTop: '12px', background: darkTheme ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.5)', color: 'white' }}>
               📧 ПОДДЕРЖКА
             </Button>
           </Div>
@@ -1099,7 +1187,6 @@ function App() {
       </div>
     );
   }
-
   if (currentScreen === 'battlepass') {
     const seasonTimeLeft = getSeasonTimeLeft();
     const daysLeft = Math.floor(seasonTimeLeft / (24 * 3600000));
@@ -1219,7 +1306,8 @@ function App() {
                 <div><div style={{ fontWeight: 'bold' }}>{rodData.name} #{idx+1}</div><div style={{ fontSize: '11px' }}>Прочность: {rod.durability}%</div></div>
                 <div style={{ display: 'flex', gap: '8px' }}>
                   {activeRod !== rod.id && <Button size="s" onClick={() => equipItem('rod', rod.id)}>Экип.</Button>}
-                  {rods.length > 1 && <Button size="s" mode="destructive" onClick={() => confirmSellItem('rod', rod.id, rodData.name, rods.indexOf(rod), Math.floor(rodData.price * 0.5))}>Продать</Button>}
+                    <Button size="s" onClick={() => repairItem('rod', rod.id, rods.indexOf(rod))} style={{ background: '#2196F3' }}>Ремонт</Button>
+                    {rods.length > 1 && <Button size="s" mode="destructive" onClick={() => confirmSellItem('rod', rod.id, rodData.name, rods.indexOf(rod), Math.floor(rodData.price * 0.5))}>Продать</Button>}
                 </div>
               </div>
             ));
@@ -1233,7 +1321,8 @@ function App() {
                 <div><div style={{ fontWeight: 'bold' }}>{lineData.name} #{idx+1}</div><div style={{ fontSize: '11px' }}>Прочность: {line.durability}%</div></div>
                 <div style={{ display: 'flex', gap: '8px' }}>
                   {activeLine !== line.id && <Button size="s" onClick={() => equipItem('line', line.id)}>Экип.</Button>}
-                  {lines.length > 1 && <Button size="s" mode="destructive" onClick={() => confirmSellItem('line', line.id, lineData.name, lines.indexOf(line), Math.floor(lineData.price * 0.5))}>Продать</Button>}
+                <Button size="s" onClick={() => repairItem('line', line.id, lines.indexOf(line))} style={{ background: '#2196F3' }}>Ремонт</Button>
+                {lines.length > 1 && <Button size="s" mode="destructive" onClick={() => confirmSellItem('line', line.id, lineData.name, lines.indexOf(line), Math.floor(lineData.price * 0.5))}>Продать</Button>}
                 </div>
               </div>
             ));
@@ -1247,7 +1336,8 @@ function App() {
                 <div><div style={{ fontWeight: 'bold' }}>{reelData.name} #{idx+1}</div><div style={{ fontSize: '11px' }}>Прочность: {reel.durability}%</div></div>
                 <div style={{ display: 'flex', gap: '8px' }}>
                   {activeReel !== reel.id && <Button size="s" onClick={() => equipItem('reel', reel.id)}>Экип.</Button>}
-                  {reels.length > 1 && <Button size="s" mode="destructive" onClick={() => confirmSellItem('reel', reel.id, reelData.name, reels.indexOf(reel), Math.floor(reelData.price * 0.5))}>Продать</Button>}
+                <Button size="s" onClick={() => repairItem('reel', reel.id, reels.indexOf(reel))} style={{ background: '#2196F3' }}>Ремонт</Button>
+                {reels.length > 1 && <Button size="s" mode="destructive" onClick={() => confirmSellItem('reel', reel.id, reelData.name, reels.indexOf(reel), Math.floor(reelData.price * 0.5))}>Продать</Button>}
                 </div>
               </div>
             ));
@@ -1261,7 +1351,8 @@ function App() {
                 <div><div style={{ fontWeight: 'bold' }}>{hookData.name} #{idx+1}</div><div style={{ fontSize: '11px' }}>Прочность: {hook.durability}%</div></div>
                 <div style={{ display: 'flex', gap: '8px' }}>
                   {activeHook !== hook.id && <Button size="s" onClick={() => equipItem('hook', hook.id)}>Экип.</Button>}
-                  {hooks.length > 1 && <Button size="s" mode="destructive" onClick={() => confirmSellItem('hook', hook.id, hookData.name, hooks.indexOf(hook), Math.floor(hookData.price * 0.5))}>Продать</Button>}
+                <Button size="s" onClick={() => repairItem('hook', hook.id, hooks.indexOf(hook))} style={{ background: '#2196F3' }}>Ремонт</Button>
+              {hooks.length > 1 && <Button size="s" mode="destructive" onClick={() => confirmSellItem('hook', hook.id, hookData.name, hooks.indexOf(hook), Math.floor(hookData.price * 0.5))}>Продать</Button>}
                 </div>
               </div>
             ));
@@ -1421,7 +1512,7 @@ function App() {
     );
   }
 
-  if (currentScreen === 'tank') {
+if (currentScreen === 'tank') {
     const fishCounts = {};
     fishTank.forEach(f => { fishCounts[f.name] = (fishCounts[f.name] || 0) + 1; });
     return (
@@ -1451,7 +1542,21 @@ function App() {
                 </div>
               ))}
               <Spacing size={16} />
-              <Button stretched onClick={sellAllFromTank} style={{ background: '#ff8c00', marginBottom: '12px' }}>💰 ПРОДАТЬ ВСЁ</Button>
+              <Button stretched onClick={() => fishTank.length > 0 && setConfirmClearTank(true)} style={{ background: '#ff8c00', marginBottom: '12px' }}>💰 ПРОДАТЬ ВСЁ</Button>
+              {confirmClearTank && (
+                <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.7)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000 }}>
+                  <div style={{ background: darkTheme ? '#333' : '#fff', borderRadius: '16px', padding: '20px', width: '280px', textAlign: 'center' }}>
+                    <div style={{ fontSize: '18px', marginBottom: '16px', color: darkTheme ? 'white' : 'black' }}>⚠️ Подтверждение</div>
+                    <div style={{ marginBottom: '20px', color: darkTheme ? 'white' : 'black' }}>
+                      Продать <b>ВСЮ</b> рыбу из садка за <b>{fishTank.reduce((sum, f) => sum + f.price, 0)} 🪙</b>?
+                    </div>
+                    <div style={{ display: 'flex', gap: '12px' }}>
+                      <Button stretched onClick={sellAllFromTank} style={{ background: '#4caf50' }}>✅ Да</Button>
+                      <Button stretched mode="secondary" onClick={() => setConfirmClearTank(false)}>❌ Нет</Button>
+                    </div>
+                  </div>
+                </div>
+              )}
               <Button stretched mode="secondary" onClick={() => setCurrentScreen('menu')}>← Назад</Button>
             </>
           )}
@@ -1460,7 +1565,7 @@ function App() {
     );
   }
 
-  if (currentScreen === 'profile') {
+if (currentScreen === 'profile') {
     const collectedCount = Object.keys(fishCollection).length;
     const totalFish = Object.keys(FISH_BASE).length;
     return (
@@ -1481,6 +1586,20 @@ function App() {
             <Spacing size={8} />
             {bestCatch ? <SimpleCell before="🏅">Лучшая рыба: <b>{bestCatch.name}</b> — {bestCatch.weight} кг</SimpleCell> : <SimpleCell before="🏅">Пока нет</SimpleCell>}
             <SimpleCell before="📏">Макс. дальность: <b>{getMaxDistance()} м</b></SimpleCell>
+            <Spacing size={16} />
+            <Title level="3">🎯 Любимая снасть</Title>
+            <Spacing size={8} />
+            {(() => {
+                const best = Object.entries(riggingCatches).sort((a, b) => b[1] - a[1])[0];
+                const rigNames = { float: 'Поплавок', feeder: 'Фидер', spinning: 'Спиннинг', jig: 'Мормышка' };
+                return (
+                    <SimpleCell before="⭐">
+                        {best && best[1] > 0 
+                            ? <b>{rigNames[best[0]]} ({best[1]} рыб)</b>
+                            : 'Пока нет улова'}
+                    </SimpleCell>
+                );
+            })()}
             <Spacing size={16} />
             <Title level="3">Коллекция</Title>
             <Spacing size={8} />
@@ -1557,7 +1676,38 @@ function App() {
       </div>
     );
   }
-
+if (currentScreen === 'news') {
+    return (
+      <div style={{ minHeight: '100vh', background: darkTheme ? '#0a0a0a' : 'linear-gradient(145deg, #0a4a6e, #1a6d8f)', padding: '16px' }}>
+        <PanelHeader style={{ background: darkTheme ? 'rgba(0,0,0,0.8)' : 'rgba(0,0,0,0.3)', color: 'white' }} before={<span style={{ cursor: 'pointer' }} onClick={() => setCurrentScreen('menu')}>←</span>}>📰 НОВОСТИ</PanelHeader>
+        <Group><Div>
+          <div style={{ background: darkTheme ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.95)', borderRadius: '24px', padding: '20px', color: darkTheme ? 'white' : 'black' }}>
+            <Title level="2" style={{ textAlign: 'center', marginBottom: '20px' }}>📋 Последние обновления</Title>
+            
+            <div style={{ background: darkTheme ? 'rgba(255,255,255,0.08)' : '#f5f5f5', borderRadius: '16px', padding: '16px', marginBottom: '12px' }}>
+              <div style={{ fontWeight: 'bold', fontSize: '16px', marginBottom: '8px' }}>🎣 Обновление 1.2</div>
+              <Text style={{ fontSize: '14px' }}>Добавлен прогноз клёва! Теперь на главном экране видно активность рыбы.</Text>
+              <div style={{ fontSize: '11px', color: '#888', marginTop: '8px' }}>10 июня 2026</div>
+            </div>
+            
+            <div style={{ background: darkTheme ? 'rgba(255,255,255,0.08)' : '#f5f5f5', borderRadius: '16px', padding: '16px', marginBottom: '12px' }}>
+              <div style={{ fontWeight: 'bold', fontSize: '16px', marginBottom: '8px' }}>🐛 Новые наживки</div>
+              <Text style={{ fontSize: '14px' }}>В магазине появился Кальмар — привлекает морских хищников!</Text>
+              <div style={{ fontSize: '11px', color: '#888', marginTop: '8px' }}>8 июня 2026</div>
+            </div>
+            
+            <div style={{ background: darkTheme ? 'rgba(255,255,255,0.08)' : '#f5f5f5', borderRadius: '16px', padding: '16px', marginBottom: '12px' }}>
+              <div style={{ fontWeight: 'bold', fontSize: '16px', marginBottom: '8px' }}>🚤 Глубокое море</div>
+              <Text style={{ fontSize: '14px' }}>Открыт новый водоём! Покупай лодку и лови Кита, Марлина и Акулу!</Text>
+              <div style={{ fontSize: '11px', color: '#888', marginTop: '8px' }}>5 июня 2026</div>
+            </div>
+          </div>
+          <Spacing size={20} />
+          <Button stretched mode="secondary" onClick={() => setCurrentScreen('menu')}>← Назад в меню</Button>
+        </Div></Group>
+      </div>
+    );
+  }
   if (currentScreen === 'donate') {
     return (
       <div style={{ minHeight: '100vh', background: darkTheme ? '#0a0a0a' : 'linear-gradient(145deg, #0a4a6e, #1a6d8f)', padding: '16px' }}>
@@ -1590,7 +1740,7 @@ function App() {
     return '#ff4444';
   };
 
-  return (
+return (
     <div style={{ 
       minHeight: '100vh', 
       backgroundImage: `linear-gradient(rgba(0,0,0,${isNightTime() ? '0.7' : '0.4'}), rgba(0,0,0,${isNightTime() ? '0.8' : '0.6'})), url(${currentLakeData?.bgImage})`,
@@ -1659,13 +1809,18 @@ function App() {
             <div style={{ background: darkTheme ? 'rgba(0,0,0,0.7)' : 'rgba(0,0,0,0.5)', borderRadius: '16px', padding: '10px', textAlign: 'center' }}><div style={{ fontSize: '24px' }}>🐟</div><div style={{ fontSize: '18px', fontWeight: 'bold', color: '#ffeaac' }}>{totalCatches}</div></div>
             <div style={{ background: darkTheme ? 'rgba(0,0,0,0.7)' : 'rgba(0,0,0,0.5)', borderRadius: '16px', padding: '10px', textAlign: 'center' }}><div style={{ fontSize: '24px' }}>⭐</div><div style={{ fontSize: '18px', fontWeight: 'bold', color: '#ffeaac' }}>{level}</div></div>
           </div>
-          <div style={{ background: darkTheme ? 'rgba(0,0,0,0.7)' : 'rgba(0,0,0,0.5)', borderRadius: '20px', padding: '10px', marginBottom: '16px', display: 'flex', justifyContent: 'space-around', fontSize: '11px', color: 'white' }}>
-            <span>🎣 {currentRod?.name.split(' ')[0]}</span>
-            <span>📿 {currentLine?.name.split(' ')[0]}</span>
-            <span>🔄 {currentReel?.name.split(' ')[0]}</span>
-            <span>🪝 {currentHook?.name.split(' ')[0]}</span>
-            <span>⚙️ {currentRigging?.name.split(' ')[0]}</span>
-          </div>
+          {(() => {
+            const getDurColor = (d) => d > 60 ? '#4caf50' : d > 30 ? '#ffc107' : '#ff4444';
+            return (
+              <div style={{ background: darkTheme ? 'rgba(0,0,0,0.7)' : 'rgba(0,0,0,0.5)', borderRadius: '20px', padding: '10px', marginBottom: '16px', display: 'flex', justifyContent: 'space-around', fontSize: '11px', color: 'white' }}>
+                <span>🎣 <span style={{ color: getDurColor(getRodDurability()) }}>{currentRod?.name.split(' ')[0]}</span></span>
+                <span>📿 <span style={{ color: getDurColor(getLineDurability()) }}>{currentLine?.name.split(' ')[0]}</span></span>
+                <span>🔄 <span style={{ color: getDurColor(getReelDurability()) }}>{currentReel?.name.split(' ')[0]}</span></span>
+                <span>🪝 <span style={{ color: getDurColor(getHookDurability()) }}>{currentHook?.name.split(' ')[0]}</span></span>
+                <span>⚙️ {currentRigging?.name.split(' ')[0]}</span>
+              </div>
+            );
+          })()}
           <div style={{ background: darkTheme ? 'rgba(0,0,0,0.7)' : 'rgba(0,0,0,0.5)', borderRadius: '20px', padding: '12px', marginBottom: '20px', textAlign: 'center', color: '#ffeaac', fontSize: '13px' }}>
             {message}
           </div>
